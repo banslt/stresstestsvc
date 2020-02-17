@@ -1,6 +1,6 @@
 {
     "name": "cpu-load-script",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "dependencies": {
         "express": "^4.17.1"
     }
