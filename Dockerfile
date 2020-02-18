@@ -34,4 +34,4 @@ COPY stresstestapp/package.json package.json
 RUN npm install --silent
 COPY stresstestapp/ .   
 # using expose-gc to force the trigger of garbage collector at the end of a memory stress to free memory instantly 
-CMD cd /stresstest/ && forever start -c "node --expose-gc --max-old-space-size=8192" mainapp.js ; while :; do sleep 2073600; done
+CMD cd /stresstest/ && forever start -c "node --require appmetrics/start --expose-gc --max-old-space-size=8192" mainapp.js ; while :; do sleep 2073600; done
