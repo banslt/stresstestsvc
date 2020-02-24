@@ -9,6 +9,7 @@ const app = express();
 const monitoring = appmetrics.monitor();
 
 const app_version = package_info.version;
+let request_nb=0;
 let postData;
 
 // ----------------------------------------------------------------------------
@@ -27,6 +28,11 @@ monitoring.on('app_version', (version) => {
   postData = `stress_app_version,host=${process.env.HOSTNAME} version=\"${version.value}\" ${version.time}`;
   new sendtelegraf(postData);
 });
+
+monitoring.on('requests', (requests) => {
+  postData = `stress_app_requests,host=${process.env.HOSTNAME} requests=\"${requests.value}\" ${requests.time}`;
+  new sendtelegraf(postData);
+});
 // ----------------------------------------------------------------------------
 
 app.get('/', function (req, res) {
@@ -35,25 +41,31 @@ app.get('/', function (req, res) {
 
 app.get('/work/:timeLoad', function (req, res) {
   let timeLoad= req.params.timeLoad;
-  new stresscpu(timeLoad);
-  // Emitting custom app metrics event for version metric
-  appmetrics.emit('app_version', {time: Date.now(), value: app_version});
+  new stresscpu(timeLoad); 
+  request_nb+=1;
   res.send(app_version);
 })
 
 app.get('/wait/:waitDuration', function (req, res) {
   let waitDuration= req.params.waitDuration;
   new stresscpu(waitDuration);
-  appmetrics.emit('app_version', {time: Date.now(), value: app_version});
+  request_nb+=1;
   res.send(app_version);
 })
 
 app.get('/mem/:bytesLoad', function (req, res) {
   let bytesLoad= req.params.bytesLoad;
   new stressmem(bytesLoad);
-  appmetrics.emit('app_version', {time: Date.now(), value: app_version});
+  request_nb+=1;
   res.send(app_version);
 }) 
+
+
+setInterval(() => {
+  appmetrics.emit('app_version', {time: Date.now(), value: app_version});
+  appmetrics.emit('requests', {time: Date.now(), value: request_nb});
+}, 1000);
+
 
 const server=app.listen(3100);
 server.timeout= 1000;
