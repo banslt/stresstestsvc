@@ -1,23 +1,18 @@
 FROM node:8-alpine as build
 
-ENV YARN_VERSION 1.0.2
 
 RUN apk add --no-cache --virtual build-dependencies --update \
     curl \
+    python \
     build-base \
     libexecinfo-dev
 
-RUN set -ex \
-    && curl -o- -L https://yarnpkg.com/install.sh | sh -s -- --version $YARN_VERSION \
-
-ARG PATH=/root/.yarn/bin:$PATH
-ENV PATH /root/.yarn/bin:$PATH
 ENV NODE_ENV production
 ENV DOCKER_BUILD=true
 
 WORKDIR /stresstest/
 COPY stresstestapp/package.json package.json
-RUN yarn install
+RUN npm install
 COPY stresstestapp/ .   
 
 RUN apk del build-dependencies
@@ -32,11 +27,9 @@ RUN apk add --no-cache --virtual build-dependencies --update \
     g++ \
     make 
     
-COPY --from=build /root/.yarn /root/.yarn
 COPY --from=build /stresstest /stresstest
 WORKDIR /stresstest
 
-ENV PATH /root/.yarn/bin:$PATH
 ENV LD_LIBRARY_PATH /app/node_modules/appmetrics
 
 RUN npm i appmetrics --silent
