@@ -3,6 +3,6 @@
     "version": "1.3.1",
     "dependencies": {
         "appmetrics": "^5.1.1",
-        "express": "^4.17.1"
+        "express": "^4.17.3"
     }
 }
